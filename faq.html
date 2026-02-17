@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>よくある質問 - みんなのれっすん</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 16px; line-height: 1.6; color: #333; }
+    h1 { font-size: 1.5rem; margin-bottom: 16px; }
+    .section { margin-bottom: 24px; }
+    .section-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 12px; }
+    .faq-item { margin-bottom: 16px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+    .faq-q { padding: 12px 16px; font-weight: 600; cursor: pointer; background: #f5f5f5; }
+    .faq-a { padding: 12px 16px; background: #fff; white-space: pre-wrap; }
+    .faq-a.hidden { display: none; }
+    .loading { text-align: center; padding: 24px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>よくある質問</h1>
+  <div id="content" class="loading">読み込み中…</div>
+  <script>
+    fetch('faqs.json')
+      .then(r => r.json())
+      .then(faqs => {
+        const groups = {};
+        faqs.forEach(f => {
+          const s = f.section || 'その他';
+          if (!groups[s]) groups[s] = [];
+          groups[s].push({ q: f.q, a: f.a });
+        });
+        let html = '';
+        for (const [section, items] of Object.entries(groups)) {
+          html += '<div class="section"><div class="section-title">' + section + '</div>';
+          const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+          items.forEach(item => {
+            html += '<div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle(\'hidden\')">' + esc(item.q) + '</div><div class="faq-a hidden">' + esc(item.a).replace(/\n/g, '<br>') + '</div></div>';
+          });
+          html += '</div>';
+        }
+        document.getElementById('content').innerHTML = html || '<p>FAQ は登録されていません</p>';
+      })
+      .catch(() => {
+        document.getElementById('content').innerHTML = '<p>読み込みに失敗しました</p>';
+      });
+  </script>
+</body>
+</html>
